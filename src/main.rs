@@ -1,8 +1,5 @@
 use std::mem::ManuallyDrop;
 
-use cxx::SharedPtr;
-use cxx::CxxVector;
-use cxx::WeakPtr;
 use ffi::MumbleServerInstance;
 
 #[cxx::bridge]
@@ -11,6 +8,7 @@ mod ffi {
     #[derive(Debug, Clone)]
     struct MumbleServerInstance {
         id: u8,
+        port: u16
     }
 
     unsafe extern "C++" {
@@ -33,10 +31,9 @@ fn main() {
     //ffi::example_function("test parameter");
 
     let c = ffi::new_communicator();
-    let metaProxy = ManuallyDrop::new(c.connect());
+    let meta_proxy = ManuallyDrop::new(c.connect());
 
-    let servers = ManuallyDrop::new(metaProxy.get_servers());
-
+    let servers = ManuallyDrop::new(meta_proxy.get_servers());
     let result = servers.iter().map(|x|x.clone()).collect::<Vec<MumbleServerInstance>>();
     dbg!(result);
 }

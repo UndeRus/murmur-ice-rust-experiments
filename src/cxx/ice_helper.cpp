@@ -3,7 +3,6 @@
 #include "murmur-ice-rust-experiments/src/cxx/ice_helper.h"
 #include "murmur-ice-rust-experiments/src/main.rs.h"
 
-
 MetaProxy::MetaProxy(MumbleServer::MetaPrx &metaProxy)
 {
 	this->metaProxy = metaProxy;
@@ -17,26 +16,22 @@ std::unique_ptr<Communicator> new_communicator()
 std::unique_ptr<std::vector<MumbleServerInstance>> MetaProxy::get_servers() const
 {
 
+	auto defaultConf = metaProxy->getDefaultConf();
 	auto servers = metaProxy->getAllServers();
-	auto result = std::vector<MumbleServerInstance>(1);
-
-
-	auto iter{servers.begin()};
-
-	while (iter != servers.end()) // пока не дойдем до конца
+	auto result = new std::vector<MumbleServerInstance>();
+	for (auto iter = servers.begin(); iter != servers.end(); ++iter)
 	{
-		std::cout << *iter << std::endl; // получаем элементы через итератор
-		// result.push_back(MumbleServerInstance { })
+		auto server = iter->get();
+		auto localConf = server->getAllConf();
+		auto conf = defaultConf;
+		conf.insert(localConf.begin(), localConf.end());
 
 		MumbleServerInstance instance{
-			id: 100
+			.id = static_cast<uint8_t>(server->id()),
+			.port = static_cast<uint16_t>(std::stoi(conf["port"])),
 		};
-		//instance.id = 100;//iter->get()->getConf();
-		result.push_back(instance);
-		++iter; // перемещаемся вперед на один элемент
+		result->push_back(instance);
 	}
 
-	std::cout << "Result size" << result.size() << std::endl;
-
-	return std::unique_ptr<std::vector<MumbleServerInstance>>(&result);
+	return std::unique_ptr<std::vector<MumbleServerInstance>>(result);
 }
