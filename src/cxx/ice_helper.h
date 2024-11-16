@@ -16,6 +16,8 @@ class MetaProxy {
         virtual ~MetaProxy() {}
 
         std::unique_ptr<std::vector<MumbleServerInstance>> get_servers() const;
+
+        void setCallback() const;
     private:
         MumbleServer::MetaPrx metaProxy;
 
@@ -48,7 +50,7 @@ public:
     {
         try
         {
-            auto base = communicator->stringToProxy("Meta:tcp -h localhost -p 6502 -t 1000"); // TODO: extract this to params
+            auto base = communicator->stringToProxy("Meta:tcp -h localhost -p 6502 -t 60000"); // TODO: extract this to params
             MumbleServer::MetaPrx metaProxy = MumbleServer::MetaPrx::checkedCast(base);
             auto aaa = std::unique_ptr<MetaProxy>(new MetaProxy(metaProxy));
             return aaa;
